@@ -8,8 +8,8 @@ import io
 
 def lambda_handler(event, context):
     s3 = boto3.client("s3")
+
     if event:
-        print("Hey this is event")
         s3_records = event["Records"][0]
         bucket_name = str(s3_records["s3"]["bucket"]["name"])
         file_name = str(s3_records["s3"]["object"]["key"])
@@ -18,10 +18,10 @@ def lambda_handler(event, context):
 
         read_excel_data = io.BytesIO(file_content)
         organizer_name = os.path.splitext(file_name)[0]
-        print(organizer_name)
-        # original_df = pd.read_excel(read_excel_data)
+
+        print(organizer_name + " data is getting processed")
+
         sheet_names = pd.ExcelFile(read_excel_data).sheet_names
-        print(str(sheet_names))
         clean_data_dict = {}
 
         for sheet_name in sheet_names:
@@ -62,7 +62,6 @@ def lambda_handler(event, context):
                 else:
                     valid_number = getValidNumber(value)
                     if (isNumber(valid_number)):
-                        print(valid_number)
                         if (clean_data_dict.get(valid_number) == None):
                             if isValidName(str(df_new.iloc[i, col_no - 1])) == True:
                                 name = str(df_new.iloc[i, col_no - 1])
@@ -77,35 +76,31 @@ def lambda_handler(event, context):
 
                 i += 1
 
-        file_name = "CustomerData.xlsx"
-        sheet_name = "CustomerData"
+        columns = ["Customer Name", "Phone Number", "Client ID", "Tags"]
+        clean_df = pd.DataFrame(columns=columns)
 
-        workbook = Workbook()
-        workbook['Sheet'].title = sheet_name
-        sheet = workbook.active
-        sheet['A1'].value = "Customer Name"
-        sheet['B1'].value = "Phone Number"
-        sheet['C1'].value = "Client ID"
-        sheet['D1'].value = "Tags"
+        i = 1
 
-        i = 2
-
+        data = []
         for customer_entry in clean_data_dict:
-            print(clean_data_dict[customer_entry][0] + "\t" + str(customer_entry)
-                  + "\t" + organizer_name + "\t" + clean_data_dict[customer_entry][1])
-            sheet.cell(row=i, column=1).value = clean_data_dict[customer_entry][0]
-            sheet.cell(row=i, column=2).value = str(customer_entry)
-            sheet.cell(row=i, column=3).value = organizer_name
-            sheet.cell(row=i, column=4).value = clean_data_dict[customer_entry][1]
+            temp_list = []
+            temp_list.append(clean_data_dict[customer_entry][0])
+            temp_list.append(str(customer_entry))
+            temp_list.append(organizer_name)
+            temp_list.append(clean_data_dict[customer_entry][1])
+            clean_df.loc[i] = temp_list
             i += 1
 
-        # workbook.save(file_name)
+        clean_df.to_csv("/tmp/clean_data.csv")
+        s3_resource = boto3.resource("s3")
+        s3_resource.Bucket("formi-backend-data").upload_file("/tmp/clean_data.csv", "clean_data.csv")
+
+        print("Cleaned data uploaded successfully")
 
     return {
         'statusCode': 200,
         'body': json.dumps('Hello from Lambda!')
     }
-
 
 def isValidName(name):
     name = str(name).replace(" ", "")
