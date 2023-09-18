@@ -91,9 +91,10 @@ def lambda_handler(event, context):
             clean_df.loc[i] = temp_list
             i += 1
 
-        clean_df.to_csv("/tmp/clean_data.csv")
+        clean_df.to_csv("/tmp/clean_data_" + organizer_name + ".csv")
         s3_resource = boto3.resource("s3")
-        s3_resource.Bucket("formi-backend-data").upload_file("/tmp/clean_data.csv", "clean_data.csv")
+        s3_resource.Bucket("formi-backend-data").upload_file("/tmp/clean_data_" + organizer_name + ".csv", "clean_data_"
+                                                             + organizer_name + ".csv")
 
         print("Cleaned data uploaded successfully")
 
