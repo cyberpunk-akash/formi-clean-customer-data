@@ -1,5 +1,5 @@
 # FORMI Hackathon Project:
-This project is a result of hackathon conducted by Formi on 18th September, 2023. I developed this end-to-end in 15 hours from 12am to 3pm. 
+This project is a result of hackathon conducted by Formi on 17th September, 2023. I developed this end-to-end in 15 hours from 12am to 3pm. 
 
 To know about the problem statement, do check out: https://doc.clickup.com/9002068787/p/h/8c91atk-26544/422497f3a492196/8c91atk-26564  
 
