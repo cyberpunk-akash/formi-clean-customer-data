@@ -72,7 +72,7 @@ def lambda_handler(event, context):
                             clean_data_list.append(sheet_name)
                             clean_data_dict[valid_number] = clean_data_list
                         else:
-                            clean_data_dict[valid_number][1] += ", " + sheet_name
+                            clean_data_dict[valid_number][1] += "," + sheet_name
 
                 i += 1
 
@@ -87,7 +87,7 @@ def lambda_handler(event, context):
             temp_list.append(clean_data_dict[customer_entry][0])
             temp_list.append(str(customer_entry))
             temp_list.append(organizer_name)
-            temp_list.append(clean_data_dict[customer_entry][1])
+            temp_list.append(', '.join(set(clean_data_dict[customer_entry][1].split(","))))
             clean_df.loc[i] = temp_list
             i += 1
 
